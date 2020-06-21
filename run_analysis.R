@@ -71,5 +71,5 @@ View(mergeData)
 ## subject.
 
 mergeData<-data.table(mergeData)
-tify <- mergeData[, lapply(.SD, mean), by = "Subjects,Activity"]
+tidy <- mergeData[, lapply(.SD, mean), by = "Subjects,Activity"]
 write.table(tidy, file = "Tidy.txt", row.names = FALSE)
