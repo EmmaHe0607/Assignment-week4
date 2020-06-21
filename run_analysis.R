@@ -1,6 +1,6 @@
 getwd()
 setwd("/Users/heshiqi/Desktop/Coursera-R/Course3-week4")
-install.packages("plyr")
+
 library(plyr)
 library(data.table)
 fileurl = 'https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip'
@@ -12,8 +12,8 @@ if (!file.exists('UCI HAR Dataset.zip')){
 ## Read data
 ## Training data:
 xtrain <- read.table('UCI HAR Dataset/train/X_train.txt', header=FALSE)
-ytrain <- read.csv('./UCI HAR Dataset/train/y_train.txt', header=FALSE)
-subjectTrain <- read.csv('./UCI HAR Dataset/train/subject_train.txt', header=FALSE)
+ytrain <- read.table('./UCI HAR Dataset/train/y_train.txt', header=FALSE)
+subjectTrain <- read.table('./UCI HAR Dataset/train/subject_train.txt', header=FALSE)
 
 ## Test data:
 xtest<- read.table("UCI HAR Dataset/test/X_test.txt", header=FALSE)
@@ -33,12 +33,11 @@ dim(xData)
 dim(yData)
 dim(subjectData)
 
-
 ## Step 2: Extracts only the measurements on the mean and standard deviation for each 
 ## measurement.
-index <- grep("mean\\(\\)|std\\(\\)", features[,2]) 
-length(index) ## count of features
-xData <- xData[,index] 
+ms <- grep("mean\\(\\)|std\\(\\)", features[,2]) 
+length(ms) ## count of features
+xData <- xData[,ms] 
 dim(xData) 
 
 ## Step 3: Uses descriptive activity names to name the activities in the data set
@@ -47,10 +46,13 @@ head(yData)
 View(yData)
 
 ## Step 4: Appropriately labels the data set with descriptive variable names.
-mergeData <- cbind(subjectData, yData, xData) ## merge all datasets
+names <- features[ms,2]
 
-names(subjectData) <- "Subjects"
+names(xData) <- names 
+names(subjectData) <- "Subject"
 names(yData) <- "Activity"
+
+mergeData <- cbind(subjectData, yData, xData)
 
 names(mergeData) <- make.names(names(mergeData))
 names(mergeData) <- gsub('Acc',"Acceleration",names(mergeData))
@@ -63,7 +65,7 @@ names(mergeData) <- gsub('\\.mean',".Mean",names(mergeData))
 names(mergeData) <- gsub('\\.std',".StandardDeviation",names(mergeData))
 names(mergeData) <- gsub('Freq\\.',"Frequency.",names(mergeData))
 names(mergeData) <- gsub('Freq$',"Frequency",names(mergeData))
-
+head(mergeData)
 View(mergeData)
 
 ## Step 5: From the data set in step 4, creates a second, independent tidy 
@@ -71,5 +73,5 @@ View(mergeData)
 ## subject.
 
 mergeData<-data.table(mergeData)
-tidy <- mergeData[, lapply(.SD, mean), by = "Subjects,Activity"]
+tidy <- mergeData[, lapply(.SD, mean), by = 'Subject,Activity']
 write.table(tidy, file = "Tidy.txt", row.names = FALSE)
